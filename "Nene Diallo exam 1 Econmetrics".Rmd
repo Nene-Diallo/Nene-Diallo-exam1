@@ -1,0 +1,143 @@
+---
+title: "Nene Diallo Exam 1 Econmetrics"
+author: "Nene Diallo"
+date: "2024-10-17"
+output: html_document
+---
+
+```{r}
+
+#Question 1. 
+#In the following data, people report their emotional support during COVID, lacking social or emotional support. I will be measuring whether age affects a person's ability to get support in the 95% confidence interval.
+#Null Hypothesis: Younger people (p1) (15-45) and older people (p2) (45-85) receive the same amount of emotional support.
+#Alternative Hypothesis: p1 > p2 — younger people get more emotional support than older people.
+
+#Using the TI-84 calculator and performing a 2-Proportion Z-test and Z- interval, we get the following. 
+
+t_statistic <- 28.40064
+p_hat1 <- 0.417770
+p_hat2 <- 0.307320
+p_hat <- 0.34868410
+n1 <- 24006
+n2 <- 40095
+df <- n1+n2 -2
+print(df)
+# Standard error calculation
+se <- sqrt(p_hat * (1 - p_hat) * (1/n1 + 1/n2))
+p_value <- 1 * (1 - pt(abs(t_statistic), df))
+#Display the result
+print(se)
+se = 0.003889012
+p_value = 0
+
+
+
+#Z-INTERVAL
+#Lower Boundary = 0.10275
+#Upper Boundary = 0.11815
+
+#Conclusion: At the 95% confidence level (α = 0.05, Z = 1.96), we reject the null hypothesis. The results of the 2-Proportion Z-test indicate that younger people (ages 15-45) receive significantly more emotional support than older people (ages 45-85) during COVID. The p-value of 0 and the positive confidence interval [0.10275, 0.11815] further confirm that there is a statistically significant difference in emotional support based on age.
+
+````
+
+
+
+```{r}
+#Question 2: 
+  
+#In the following data, people's ability to work from home is measured based on whether or not they have a 4-year degree. I will use the 95% confidence interval to evaluate this.
+#Null Hypothesis:People with 4-year degrees (p1) and those without a 4-year degree (p2) work from home the same amount.
+#Alternative Hypothesis:p1 > p2 — People with 4-year degrees have a higher chance of working from home than those without a 4-year degree.
+
+t_statistic <- 75.50766
+p_hat1 <- 0.4652939
+p_hat2 <- 0.1846719
+p_hat <- 0.33102986
+n1 <- 33510
+n2 <- 30741
+df <- n1+n2 -2
+print(df)
+# Standard error calculation
+se <- sqrt(p_hat * (1 - p_hat) * (1/n1 + 1/n2))
+p_value <- 1 * (1 - pt(abs(t_statistic), df))
+#Display the result
+print(se)
+se = 0.00371647
+p_value = 0
+
+#Z-INTERVAL
+#Lower Boundary = 0.27374 
+#Upper Boundary = 0.2875
+
+#Conslusion: We reject the null hypothesis that there is no difference in the ability to work from home between individuals with a 4-year degree and those without. The p-value (0) and the confidence interval (0.27374 to 0.2875) strongly indicate that individuals with a 4-year degree are significantly more likely to work from home than those without a degree. 
+```
+
+
+```{r}
+
+#Question 3
+
+load("~/Desktop/Household_Pulse_data_ph4c2.RData")
+View(Household_Pulse_data)
+#SUBGROUP: I will focus on the type of work and income when measuring whether or not someone receives emotional support because I believe that income and the type of job people do play a significant role in their decisions and choices regarding emotional support.
+require(forcats)
+require(ggplot2)
+
+Household_Pulse_data$income_midpoint <- fct_recode(Household_Pulse_data$INCOME, 
+    "12500" = "HH income less than $25k",
+     "30000" = "HH income $25k - $34.9k",
+     "40000" = "HH income $35k - 49.9",
+   "62500" = "HH income $50k - 74.9",
+   "82500" = "HH income $75 - 99.9",
+        "125000" = "HH income $100k - 149",
+    "175000" = "HH income $150 - 199",
+           "225000" = "HH income $200k +",
+         NULL = "NA")
+
+
+Household_Pulse_data$income_midpoint <- as.numeric(levels(Household_Pulse_data$income_midpoint))[Household_Pulse_data$income_midpoint]
+
+Household_Pulse_data$s_e_support_numeric <- fct_recode(Household_Pulse_data$SOCIAL1,
+                                      "5" = "always get social emotional support",
+                                      "4" = "usually",
+                                      "3" = "sometimes",
+                                      "2" = "rarely",
+                                      "1" = "never") 
+
+Household_Pulse_data$s_e_support_numeric <- as.numeric(levels(Household_Pulse_data$s_e_support_numeric))[Household_Pulse_data$s_e_support_numeric]
+ 
+library(dplyr)
+
+# Recoding 'KINDWORK' to numerical values for 'Type_of_work'
+Household_Pulse_data$Type_of_work <- fct_recode(Household_Pulse_data$KINDWORK,
+                                                "0" = "NA",
+                                                "1" = "work for govt",
+                                                "2" = "work for private co",
+                                                "3" = "work for nonprofit",
+                                                "4" = "self employed",
+                                                "5" = "work in family biz")
+
+# Convert 'Type_of_work' into numeric format
+Household_Pulse_data$Type_of_work <- as.numeric(levels(Household_Pulse_data$Type_of_work))[Household_Pulse_data$Type_of_work]
+summary(Household_Pulse_data$Type_of_work)
+
+# Cross-tabulation of Type_of_work and KINDWORK
+xtabs(formula = ~Type_of_work + KINDWORK,  data = Household_Pulse_data)
+# Filter data for people support level 
+
+subgroup <- Household_Pulse_data %>%
+filter(KINDWORK & income_midpoint & s_e_support))
+
+```
+
+```{r}
+
+#For this section, I will focus on people who work in government and those who work for private companies, examining the emotional support they receive at the 90% confidence interval.
+#Null Hypothesis: People in government jobs (P1) and those in private companies (P2) have the same levels of emotional support.
+#Alternative Hypothesis: People in private companies (P2) have more emotional support than those in government jobs (P1), or P1 < P2.
+
+model_1 <- lm(income_midpoint  ~ KINDWORK + s_e_support, data = subgroup)  
+confint(model_1, level = 0.90)
+summary(model_1)
+
+````
